@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 #Definir estilos custom tkinter
-ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("blue")
 ctk.set_default_color_theme("blue")
 
 
@@ -54,7 +54,7 @@ def Clasificar():
         bias = float(B.get())
     except:
         print("Algo ocurrio con las entradas")
-    #Seguro
+    #validations
     if w1 == '' or w2 == '' or bias == '':
         return
     
@@ -63,7 +63,7 @@ def Clasificar():
     x = np.linspace(-5, 5, 400) #valores en un rango 
     y = m*x+c
     limpiar()
-    ax.plot(x,y,color='green')
+    ax.plot(x,y,color='orange')
     canvas.draw()
 
 
@@ -93,7 +93,7 @@ def quit():
 
 
 ventana = ctk.CTk()
-ventana.title("Practica 1")
+ventana.title("Practica 1 inteligencia artifical 2")
 
 #Titulo
 frameTitle = ctk.CTkFrame(ventana)
@@ -104,9 +104,10 @@ frameTitle.pack(side="top",fill=ctk.BOTH,expand=True)
 
 #INTERFAZ ENTRADAS
 frameInputs = ctk.CTkFrame(ventana)
+print("the frames are",frameInputs)
 
 
-TITULO = ctk.CTkLabel(frameInputs,text="DEFINIR VALORES",padx=10)
+TITULO = ctk.CTkLabel(frameInputs,text="Pon las entardas",padx=10)
 TITULO.grid(row=0,column=1)
 
 #W1
@@ -131,7 +132,7 @@ TB = ctk.CTkEntry(frameInputs,textvariable=B)
 TB.grid(row=3,column=1,pady=20,padx=20)
 
 #boton
-btn= ctk.CTkButton(frameInputs,text = 'PLOT', command = Clasificar)
+btn= ctk.CTkButton(frameInputs,text = ' Enter', command = Clasificar)
 btn.grid(row=4,column=1,pady=20,padx=20)
 
 frameInputs.pack(side='right',fill=ctk.BOTH,expand=True)
@@ -139,7 +140,8 @@ frameInputs.pack(side='right',fill=ctk.BOTH,expand=True)
 #INTERFAZ GRAFICA
 frame = ctk.CTkFrame(ventana)
 frame.pack(side='left')
-
 generarPlano(frame)
+
+
 ventana.protocol("WM_DELETE_WINDOW", quit)
 ventana.mainloop()
