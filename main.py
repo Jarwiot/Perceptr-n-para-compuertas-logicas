@@ -1,81 +1,147 @@
-
+import customtkinter as ctk
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-# Variables globales
-points = []  # Lista de puntos
-w1, w2, bias = 0, 0, 0  # Pesos iniciales
-classified = False  # Estado de clasificación
+#Definir estilos custom tkinter
+ctk.set_appearance_mode("blue")
+ctk.set_default_color_theme("blue")
 
-def perceptron_classify(x1, x2):
-    """Clasifica el punto usando la ecuación del perceptrón."""
-    return 1 if (w1 * x1 + w2 * x2 + bias) >= 0 else 0
 
+entradas = np.empty((0,2),dtype=float)
+
+
+
+def generarPlano(frame):
+    global ax,canvas
+    figura = plt.figure(figsize=(5,5),dpi=100)
+    ax = figura.add_subplot(111)
+    ax.set_xlim(-5,5)
+    ax.set_ylim(-5,5)
+
+    #Generar ejes de coordenadas
+    ax.axhline(0, color='black',linewidth=1)
+    ax.axvline(0, color='black',linewidth=1)
+
+    canvas = FigureCanvasTkAgg(figura, master=frame)
+    canvas.draw()
+    canvas.get_tk_widget().pack(fill=ctk.BOTH, expand=True)
+    #CONECTAR CON FUNCION DE EVENTO
+    canvas.mpl_connect('button_press_event',onclick)
+    
 def onclick(event):
-    """Maneja los clics del mouse para agregar puntos."""
-    global points, classified
-    if event.xdata is not None and event.ydata is not None and not classified:
-        points.append((event.xdata, event.ydata, 'black'))
-        redraw()
+    global entradas
+    x = event.xdata
+    y = event.ydata
 
-def classify_points():
-    """Clasifica los puntos según el perceptrón y cambia su color."""
-    global points, classified
-    if classified:
+    #comprobar que no se salga del limite del plano
+    if x != None and y != None:
+        ndatos = np.array([[x,y]])
+        entradas = np.vstack((entradas,ndatos))
+        ax.plot(x,y,'Pk')
+        canvas.draw()
+        print(entradas)
+
+
+def Clasificar():
+    global entradas
+    w1 = ''
+    w2 = ''
+    bias = ''
+    try:
+        w1 = float(W1.get())
+        w2 = float(W2.get())
+        bias = float(B.get())
+    except:
+        print("Algo ocurrio con las entradas")
+    #validations
+    if w1 == '' or w2 == '' or bias == '':
         return
     
-    for i in range(len(points)):
-        x1, x2, _ = points[i]
-        color = 'blue' if perceptron_classify(x1, x2) else 'red'
-        points[i] = (x1, x2, color)
-    classified = True
-    redraw()
+    m = -w1/w2
+    c = -bias/w2
+    x = np.linspace(-5, 5, 400) #valores en un rango 
+    y = m*x+c
+    limpiar()
+    ax.plot(x,y,color='orange')
+    canvas.draw()
 
-def plot_hyperplane():
-    """Grafica la línea de decisión del perceptrón."""
-    if w2 == 0:
-        return
-    
-    x_vals = np.linspace(-10, 10, 100)
-    y_vals = (-w1 * x_vals - bias) / w2
-    plt.plot(x_vals, y_vals, 'green', linestyle='dashed', label='Hiperplano')
 
-def redraw():
-    """Redibuja la gráfica con los puntos y el hiperplano."""
-    plt.clf()
-    plt.xlim(-10, 10)
-    plt.ylim(-10, 10)
-    plt.xlabel('x1')
-    plt.ylabel('x2')
-    plt.title('Perceptrón para Clasificación')
+    for i in range(len(entradas)):
+        z = w1*entradas[i,0]+w2*entradas[i,1]+bias
+        if z <= 0:
+            ax.plot(entradas[i,0],entradas[i,1],'Pr')
+        else:
+            ax.plot(entradas[i,0],entradas[i,1],'Pb')
+        
+    canvas.draw()
     
-    for x1, x2, color in points:
-        plt.scatter(x1, x2, color=color)
-    
-    if classified:
-        plot_hyperplane()
-    
-    plt.legend()
-    plt.draw()
 
-def main():
-    global w1, w2, bias
-    
-    w1 = float(input("Ingrese el peso w1: "))
-    w2 = float(input("Ingrese el peso w2: "))
-    bias = float(input("Ingrese el bias w0: "))
-    
-    fig, ax = plt.subplots()
-    fig.canvas.mpl_connect('button_press_event', onclick)
-    plt.xlim(-10, 10)
-    plt.ylim(-10, 10)
-    plt.xlabel('x1')
-    plt.ylabel('x2')
-    plt.title('Perceptrón para Clasificación')
-    plt.show()
-    
-    classify_points()
-    plt.show()
+def limpiar():
+    ax.clear()
+    ax.set_xlim(-5,5)
+    ax.set_ylim(-5,5)
 
-if __name__ == "__main__":
-    main()
+    #Generar ejes de coordenadas
+    ax.axhline(0, color='black',linewidth=1)
+    ax.axvline(0, color='black',linewidth=1)
+    canvas.draw()
+
+def quit():
+    ventana.quit()
+    ventana.destroy()
+
+
+ventana = ctk.CTk()
+ventana.title("Practica 1 inteligencia artifical 2")
+
+#Titulo
+frameTitle = ctk.CTkFrame(ventana)
+Title = ctk.CTkLabel(frameTitle,text="PERCEPTRON",padx=300,font=("Arial",25),pady=10)
+Title.grid(row=0,column=1)
+frameTitle.pack(side="top",fill=ctk.BOTH,expand=True)
+
+
+#INTERFAZ ENTRADAS
+frameInputs = ctk.CTkFrame(ventana)
+print("the frames are",frameInputs)
+
+
+TITULO = ctk.CTkLabel(frameInputs,text="Pon las entardas",padx=10)
+TITULO.grid(row=0,column=1)
+
+#W1
+LW1 = ctk.CTkLabel(frameInputs,text="W1",padx=10)
+LW1.grid(row=1,column=0)
+W1 = ctk.StringVar()
+TW1 = ctk.CTkEntry(frameInputs,textvariable=W1)
+TW1.grid(row=1,column=1,pady=20)
+
+#W2
+LW2 = ctk.CTkLabel(frameInputs,text="W2",padx=10)
+LW2.grid(row=2,column=0)
+W2 = ctk.StringVar()
+TW2 = ctk.CTkEntry(frameInputs,textvariable=W2)
+TW2.grid(row=2,column=1)
+
+#BIAS
+LB = ctk.CTkLabel(frameInputs,text="BIAS",padx=10)
+LB.grid(row=3,column=0)
+B = ctk.StringVar()
+TB = ctk.CTkEntry(frameInputs,textvariable=B)
+TB.grid(row=3,column=1,pady=20,padx=20)
+
+#boton
+btn= ctk.CTkButton(frameInputs,text = ' Enter', command = Clasificar)
+btn.grid(row=4,column=1,pady=20,padx=20)
+
+frameInputs.pack(side='right',fill=ctk.BOTH,expand=True)
+
+#INTERFAZ GRAFICA
+frame = ctk.CTkFrame(ventana)
+frame.pack(side='left')
+generarPlano(frame)
+
+
+ventana.protocol("WM_DELETE_WINDOW", quit)
+ventana.mainloop()
